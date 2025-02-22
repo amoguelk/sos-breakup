@@ -10,7 +10,6 @@ import {
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AdviceService } from './advice.service';
-import { AdviceDto } from './dto/advice.dto';
 
 @WebSocketGateway()
 export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -46,12 +45,13 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @SubscribeMessage('createAdvice')
   async handleCreate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() createAdviceDto: AdviceDto,
+    @MessageBody('prompt') prompt: string,
   ) {
-    createAdviceDto.client_id = client.id;
-    await this.adviceService.create(createAdviceDto);
-    this.logger.debug(
-      `Client ${createAdviceDto.client_id} has created advice with message "${createAdviceDto.message}"`,
-    );
+    try {
+      const resp = await this.adviceService.create(prompt, client.id);
+      this.server.emit('adviceSocket', resp.message);
+    } catch (error) {
+      this.logger.error(`Error creating advice: ${error}`);
+    }
   }
 }
