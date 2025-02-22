@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import {
   ConnectedSocket,
   MessageBody,
@@ -10,6 +9,8 @@ import {
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { AdviceService } from './advice.service';
+import { Advice } from './interfaces/advice.interface';
+import { Logger } from '@nestjs/common';
 
 @WebSocketGateway()
 export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -18,12 +19,14 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
+  private logger: Logger = new Logger('AdviceGateway');
+
   handleConnection(client: Socket) {
-    this.server.emit('room', `Client ${client.id} connected`);
+    this.logger.log('adviceSocket', `Client ${client.id} connected`);
   }
 
   handleDisconnect(client: Socket) {
-    this.server.emit('room', `Client ${client.id} disconnected`);
+    this.logger.log('adviceSocket', `Client ${client.id} disconnected`);
   }
 
   @SubscribeMessage('message')
@@ -31,12 +34,29 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody() message: any,
   ) {
-    this.server.emit('room', `[${client.id}] -> ${message}`);
+    this.server.emit('adviceSocket', `[${client.id}] -> ${message}`);
   }
 
+  /**
+   * Returns all advice objects
+   */
   @SubscribeMessage('findAll')
-  handleEvent() {
+  handleFindAll() {
     const resp = this.adviceService.findAll();
-    console.log('🪲 resp:', resp);
+    this.logger.debug(`resp: ${resp}`);
+  }
+
+  /**
+   * Creates a new advice object
+   * @param advice An object with the advice information
+   */
+  @SubscribeMessage('create')
+  handleCreate(
+    @ConnectedSocket() client: Socket,
+    @MessageBody() adviceStr: string,
+  ) {
+    const advice: Advice = JSON.parse(adviceStr) as Advice;
+    advice.client_id = client.id;
+    this.logger.debug(`advice: ${advice.message}, sent to ${advice.client_id}`);
   }
 }
