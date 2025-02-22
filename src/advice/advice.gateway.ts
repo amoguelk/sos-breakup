@@ -7,10 +7,10 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
 import { AdviceService } from './advice.service';
-import { Advice } from './interfaces/advice.interface';
-import { Logger } from '@nestjs/common';
+import { AdviceDto } from './dto/advice.dto';
 
 @WebSocketGateway()
 export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
@@ -29,34 +29,29 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log('adviceSocket', `Client ${client.id} disconnected`);
   }
 
-  @SubscribeMessage('message')
-  handleMessage(
-    @ConnectedSocket() client: Socket,
-    @MessageBody() message: any,
-  ) {
-    this.server.emit('adviceSocket', `[${client.id}] -> ${message}`);
+  @SubscribeMessage('findAllAdvice')
+  async handleFindAll() {
+    const resp = await this.adviceService.findAll();
+    this.server.emit('adviceSocket', resp);
+    return resp;
   }
 
-  /**
-   * Returns all advice objects
-   */
-  @SubscribeMessage('findAll')
-  handleFindAll() {
-    const resp = this.adviceService.findAll();
-    this.logger.debug(`resp: ${resp}`);
+  @SubscribeMessage('findOneAdvice')
+  async handleFindOne(@MessageBody('id') id: number) {
+    const resp = await this.adviceService.findOne(id);
+    this.server.emit('adviceSocket', resp);
+    return resp;
   }
 
-  /**
-   * Creates a new advice object
-   * @param advice An object with the advice information
-   */
-  @SubscribeMessage('create')
-  handleCreate(
+  @SubscribeMessage('createAdvice')
+  async handleCreate(
     @ConnectedSocket() client: Socket,
-    @MessageBody() adviceStr: string,
+    @MessageBody() createAdviceDto: AdviceDto,
   ) {
-    const advice: Advice = JSON.parse(adviceStr) as Advice;
-    advice.client_id = client.id;
-    this.logger.debug(`advice: ${advice.message}, sent to ${advice.client_id}`);
+    createAdviceDto.client_id = client.id;
+    await this.adviceService.create(createAdviceDto);
+    this.logger.debug(
+      `Client ${createAdviceDto.client_id} has created advice with message "${createAdviceDto.message}"`,
+    );
   }
 }
