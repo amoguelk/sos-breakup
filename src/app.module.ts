@@ -6,12 +6,15 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { Advice } from './advice/advice.entity';
+import { PlaylistModule } from './playlist/playlist.module';
+import { Playlist } from './playlist/playlist.entity';
 
 /**
  * The root module of the application
  */
 @Module({
   imports: [
+    // Configuration
     ConfigModule.forRoot({ envFilePath: '.env.develop' }),
     TypeOrmModule.forRoot({
       type: 'mysql',
@@ -21,9 +24,11 @@ import { Advice } from './advice/advice.entity';
       database: 'sos_breakup',
       port: 3306,
       synchronize: true, // ! Disable if prod
-      entities: [Advice],
+      entities: [Advice, Playlist],
     }),
+    // Modules
     AdviceModule,
+    PlaylistModule,
   ],
   controllers: [AppController],
   providers: [AppService],

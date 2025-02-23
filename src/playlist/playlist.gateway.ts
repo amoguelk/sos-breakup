@@ -9,16 +9,18 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { AdviceService } from './advice.service';
+import { PlaylistService } from './playlist.service';
 
 @WebSocketGateway()
-export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
-  constructor(private adviceService: AdviceService) {}
+export class PlaylistGateway
+  implements OnGatewayConnection, OnGatewayDisconnect
+{
+  constructor(private playlistService: PlaylistService) {}
 
   @WebSocketServer()
   server: Server;
 
-  private logger: Logger = new Logger('AdviceGateway');
+  private logger: Logger = new Logger('PlaylistGateway');
 
   handleConnection(client: Socket) {
     this.logger.log(`Client ${client.id} connected`);
@@ -28,33 +30,33 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
     this.logger.log(`Client ${client.id} disconnected`);
   }
 
-  @SubscribeMessage('findAllAdvice')
+  @SubscribeMessage('findAllPlaylist')
   async handleFindAll(@ConnectedSocket() client: Socket) {
-    const resp = await this.adviceService.findAll();
-    client.emit('adviceSocket', resp);
+    const resp = await this.playlistService.findAll();
+    client.emit('playlistSocket', resp);
     return resp;
   }
 
-  @SubscribeMessage('findOneAdvice')
+  @SubscribeMessage('findOnePlaylist')
   async handleFindOne(
     @ConnectedSocket() client: Socket,
     @MessageBody('id') id: number,
   ) {
-    const resp = await this.adviceService.findOne(id);
-    client.emit('adviceSocket', resp);
+    const resp = await this.playlistService.findOne(id);
+    client.emit('playlistSocket', resp);
     return resp;
   }
 
-  @SubscribeMessage('createAdvice')
+  @SubscribeMessage('createPlaylist')
   async handleCreate(
     @ConnectedSocket() client: Socket,
     @MessageBody('prompt') prompt: string,
   ) {
     try {
-      const resp = await this.adviceService.create(prompt, client.id);
-      client.emit('adviceSocket', resp.message);
+      const resp = await this.playlistService.create(prompt, client.id);
+      client.emit('playlistSocket', resp.message);
     } catch (error) {
-      this.logger.error(`Error creating advice: ${error}`);
+      this.logger.error(`Error creating playlist: ${error}`);
     }
   }
 }
