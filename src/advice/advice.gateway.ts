@@ -29,16 +29,19 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
   }
 
   @SubscribeMessage('findAllAdvice')
-  async handleFindAll() {
+  async handleFindAll(@ConnectedSocket() client: Socket) {
     const resp = await this.adviceService.findAll();
-    this.server.emit('adviceSocket', resp);
+    client.emit('adviceSocket', resp);
     return resp;
   }
 
   @SubscribeMessage('findOneAdvice')
-  async handleFindOne(@MessageBody('id') id: number) {
+  async handleFindOne(
+    @ConnectedSocket() client: Socket,
+    @MessageBody('id') id: number,
+  ) {
     const resp = await this.adviceService.findOne(id);
-    this.server.emit('adviceSocket', resp);
+    client.emit('adviceSocket', resp);
     return resp;
   }
 
@@ -49,7 +52,7 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
   ) {
     try {
       const resp = await this.adviceService.create(prompt, client.id);
-      this.server.emit('adviceSocket', resp.message);
+      client.emit('adviceSocket', resp.message);
     } catch (error) {
       this.logger.error(`Error creating advice: ${error}`);
     }

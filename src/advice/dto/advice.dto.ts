@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unsafe-call */
 import { IsNotEmpty } from 'class-validator';
 
 export class AdviceDto {
@@ -7,6 +6,12 @@ export class AdviceDto {
    */
   @IsNotEmpty()
   message: string;
+
+  /**
+   * The user's prompt
+   */
+  @IsNotEmpty()
+  prompt: string;
 
   /**
    * The amount of OpenAI tokens used to create the advice

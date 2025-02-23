@@ -17,6 +17,12 @@ export class Advice {
   message: string;
 
   /**
+   * The user's prompt
+   */
+  @Column()
+  prompt: string;
+
+  /**
    * The amount of OpenAI tokens used to create the advice
    */
   @Column()

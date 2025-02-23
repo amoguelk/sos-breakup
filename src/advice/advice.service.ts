@@ -56,6 +56,7 @@ export class AdviceService {
 
     const newAdvice: AdviceDto = {
       message,
+      prompt,
       tokens: chatResponse.usage?.total_tokens,
       client_id,
     };
