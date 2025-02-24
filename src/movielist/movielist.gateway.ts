@@ -46,6 +46,7 @@ export class MovieListGateway
     @MessageBody('id') id: number,
   ) {
     try {
+      if (!id) throw new Error('id field is required');
       const resp = await this.movieListService.findOne(id);
       client.emit('movieListSocket', resp);
     } catch (error) {

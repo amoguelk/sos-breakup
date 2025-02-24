@@ -13,13 +13,13 @@ export class Advice {
   /**
    * The contents of the given advice
    */
-  @Column()
+  @Column({ type: 'varchar', length: 1000 })
   message: string;
 
   /**
    * The user's prompt
    */
-  @Column()
+  @Column({ type: 'varchar', length: 500 })
   prompt: string;
 
   /**

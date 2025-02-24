@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Advice } from './advice.entity';
 import { Repository } from 'typeorm';
 import OpenAI from 'openai';
+import { generateAIResponse } from 'src/_utils/generateAIResponse';
 
 @Injectable()
 export class AdviceService {
@@ -36,29 +37,13 @@ export class AdviceService {
    * @param client_id The ID of the client that requested the advice
    */
   async create(prompt: string, client_id: string) {
-    const chatResponse = await this.openai.chat.completions.create({
-      model: 'gpt-3.5-turbo-0125',
-      messages: [
-        {
-          role: 'system',
-          content: `Your purpose is to create a piece of advice to the user based on the given prompt. The user recently went through a breakup, and is looking for friendly, helpful advice. Keep your responses very short and to the point, but make sure to make them relevant to the user's specific situation.`,
-        },
-        { role: 'user', content: prompt },
-      ],
-      max_tokens: 1000,
-    });
-    const [message] = chatResponse.choices.map(
-      (choice) => choice.message.content,
-    );
-
-    if (message === null || !chatResponse.usage?.total_tokens) {
-      throw new Error('Error generating response');
-    }
-
     const newAdvice: AdviceDto = {
-      message,
-      prompt,
-      tokens: chatResponse.usage?.total_tokens,
+      ...(await generateAIResponse({
+        openaiClient: this.openai,
+        systemContext:
+          "Your purpose is to create a piece of advice to the user based on the given prompt. The user recently went through a breakup, and is looking for friendly, helpful advice. Keep your responses very short and to the point, but make sure to make them relevant to the user's specific situation.",
+        prompt,
+      })),
       client_id,
     };
 

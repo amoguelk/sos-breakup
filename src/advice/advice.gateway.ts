@@ -44,6 +44,7 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @MessageBody('id') id: number,
   ) {
     try {
+      if (!id) throw new Error('id field is required');
       const resp = await this.adviceService.findOne(id);
       client.emit('adviceSocket', resp);
     } catch (error) {

@@ -13,13 +13,13 @@ export class MovieList {
   /**
    * The contents of the given movie list
    */
-  @Column()
+  @Column({ type: 'varchar', length: 1000 })
   message: string;
 
   /**
    * The user's prompt
    */
-  @Column()
+  @Column({ type: 'varchar', length: 500 })
   prompt: string;
 
   /**

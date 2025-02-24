@@ -46,6 +46,7 @@ export class PlaylistGateway
     @MessageBody('id') id: number,
   ) {
     try {
+      if (!id) throw new Error('id field is required');
       const resp = await this.playlistService.findOne(id);
       client.emit('playlistSocket', resp);
     } catch (error) {
