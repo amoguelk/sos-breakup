@@ -10,6 +10,8 @@ import { PlaylistModule } from './playlist/playlist.module';
 import { Playlist } from './playlist/playlist.entity';
 import { MovieList } from './movielist/movielist.entity';
 import { MovieListModule } from './movielist/movielist.module';
+import { Joke } from './joke/joke.entity';
+import { JokeModule } from './joke/joke.module';
 
 /**
  * The root module of the application
@@ -26,12 +28,13 @@ import { MovieListModule } from './movielist/movielist.module';
       database: 'sos_breakup',
       port: 3306,
       synchronize: true, // ! Disable if prod
-      entities: [Advice, Playlist, MovieList],
+      entities: [Advice, Playlist, MovieList, Joke],
     }),
     // Modules
     AdviceModule,
     PlaylistModule,
     MovieListModule,
+    JokeModule,
   ],
   controllers: [AppController],
   providers: [AppService],

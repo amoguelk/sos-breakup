@@ -30,9 +30,12 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('findAllAdvice')
   async handleFindAll(@ConnectedSocket() client: Socket) {
-    const resp = await this.adviceService.findAll();
-    client.emit('adviceSocket', resp);
-    return resp;
+    try {
+      const resp = await this.adviceService.findAll();
+      client.emit('adviceSocket', resp);
+    } catch (error) {
+      this.logger.error(`Error getting all advice objects: ${error}`);
+    }
   }
 
   @SubscribeMessage('findOneAdvice')
@@ -40,9 +43,12 @@ export class AdviceGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @ConnectedSocket() client: Socket,
     @MessageBody('id') id: number,
   ) {
-    const resp = await this.adviceService.findOne(id);
-    client.emit('adviceSocket', resp);
-    return resp;
+    try {
+      const resp = await this.adviceService.findOne(id);
+      client.emit('adviceSocket', resp);
+    } catch (error) {
+      this.logger.error(`Error getting advice object: ${error}`);
+    }
   }
 
   @SubscribeMessage('createAdvice')

@@ -32,9 +32,12 @@ export class PlaylistGateway
 
   @SubscribeMessage('findAllPlaylist')
   async handleFindAll(@ConnectedSocket() client: Socket) {
-    const resp = await this.playlistService.findAll();
-    client.emit('playlistSocket', resp);
-    return resp;
+    try {
+      const resp = await this.playlistService.findAll();
+      client.emit('playlistSocket', resp);
+    } catch (error) {
+      this.logger.error(`Error getting playlists: ${error}`);
+    }
   }
 
   @SubscribeMessage('findOnePlaylist')
@@ -42,9 +45,12 @@ export class PlaylistGateway
     @ConnectedSocket() client: Socket,
     @MessageBody('id') id: number,
   ) {
-    const resp = await this.playlistService.findOne(id);
-    client.emit('playlistSocket', resp);
-    return resp;
+    try {
+      const resp = await this.playlistService.findOne(id);
+      client.emit('playlistSocket', resp);
+    } catch (error) {
+      this.logger.error(`Error getting playlist: ${error}`);
+    }
   }
 
   @SubscribeMessage('createPlaylist')

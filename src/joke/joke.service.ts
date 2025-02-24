@@ -1,39 +1,39 @@
 import { Injectable } from '@nestjs/common';
-import { AdviceDto } from './advice.dto';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Advice } from './advice.entity';
 import { Repository } from 'typeorm';
 import OpenAI from 'openai';
+import { Joke } from './joke.entity';
+import { JokeDto } from './joke.dto';
 
 @Injectable()
-export class AdviceService {
+export class JokeService {
   private readonly openai: OpenAI;
   constructor(
-    @InjectRepository(Advice)
-    private adviceRepository: Repository<Advice>,
+    @InjectRepository(Joke)
+    private jokeRepository: Repository<Joke>,
   ) {
     this.openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
   }
 
   /**
-   * Returns all advice objects
+   * Returns all joke objects
    */
   findAll() {
-    return this.adviceRepository.find();
+    return this.jokeRepository.find();
   }
 
   /**
-   * Returns the advice object with the given ID
-   * @param id The ID of the advice to find
+   * Returns the joke object with the given ID
+   * @param id The ID of the joke to find
    */
   findOne(id: number) {
-    return this.adviceRepository.findOneBy({ id });
+    return this.jokeRepository.findOneBy({ id });
   }
 
   /**
-   * Creates a new advice object
+   * Creates a new joke object
    * @param prompt The prompt given by the client
-   * @param client_id The ID of the client that requested the advice
+   * @param client_id The ID of the client that requested the joke
    */
   async create(prompt: string, client_id: string) {
     const chatResponse = await this.openai.chat.completions.create({
@@ -41,7 +41,7 @@ export class AdviceService {
       messages: [
         {
           role: 'system',
-          content: `Your purpose is to create a piece of advice to the user based on the given prompt. The user recently went through a breakup, and is looking for friendly, helpful advice. Keep your responses very short and to the point, but make sure to make them relevant to the user's specific situation.`,
+          content: `Your purpose is to create a joke to cheer up the user, who is going through a break up. Adapt the contents to the joke based on the context given by the user's input. The joke must be short.`,
         },
         { role: 'user', content: prompt },
       ],
@@ -55,14 +55,14 @@ export class AdviceService {
       throw new Error('Error generating response');
     }
 
-    const newAdvice: AdviceDto = {
+    const newJoke: JokeDto = {
       message,
       prompt,
       tokens: chatResponse.usage?.total_tokens,
       client_id,
     };
 
-    await this.adviceRepository.save(newAdvice);
-    return newAdvice;
+    await this.jokeRepository.save(newJoke);
+    return newJoke;
   }
 }

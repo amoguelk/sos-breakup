@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import OpenAI from 'openai';
 import { Playlist } from './playlist.entity';
-import { PlaylistDto } from './dto/playlists.dto';
+import { PlaylistDto } from './playlists.dto';
 
 @Injectable()
 export class PlaylistService {

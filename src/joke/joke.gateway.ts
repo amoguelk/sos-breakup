@@ -9,18 +9,16 @@ import {
 } from '@nestjs/websockets';
 import { Logger } from '@nestjs/common';
 import { Server, Socket } from 'socket.io';
-import { MovieListService } from './movielist.service';
+import { JokeService } from './joke.service';
 
 @WebSocketGateway()
-export class MovieListGateway
-  implements OnGatewayConnection, OnGatewayDisconnect
-{
-  constructor(private movieListService: MovieListService) {}
+export class JokeGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(private jokeService: JokeService) {}
 
   @WebSocketServer()
   server: Server;
 
-  private logger: Logger = new Logger('MovieListGateway');
+  private logger: Logger = new Logger('JokeGateway');
 
   handleConnection(client: Socket) {
     this.logger.log(`Client ${client.id} connected`);
@@ -30,39 +28,39 @@ export class MovieListGateway
     this.logger.log(`Client ${client.id} disconnected`);
   }
 
-  @SubscribeMessage('findAllMovieList')
+  @SubscribeMessage('findAllJoke')
   async handleFindAll(@ConnectedSocket() client: Socket) {
     try {
-      const resp = await this.movieListService.findAll();
-      client.emit('movieListSocket', resp);
+      const resp = await this.jokeService.findAll();
+      client.emit('jokeSocket', resp);
     } catch (error) {
-      this.logger.error(`Error getting all movie lists: ${error}`);
+      this.logger.error(`Error getting all jokes: ${error}`);
     }
   }
 
-  @SubscribeMessage('findOneMovieList')
+  @SubscribeMessage('findOneJoke')
   async handleFindOne(
     @ConnectedSocket() client: Socket,
     @MessageBody('id') id: number,
   ) {
     try {
-      const resp = await this.movieListService.findOne(id);
-      client.emit('movieListSocket', resp);
+      const resp = await this.jokeService.findOne(id);
+      client.emit('jokeSocket', resp);
     } catch (error) {
-      this.logger.error(`Error getting movie list: ${error}`);
+      this.logger.error(`Error getting joke: ${error}`);
     }
   }
 
-  @SubscribeMessage('createMovieList')
+  @SubscribeMessage('createJoke')
   async handleCreate(
     @ConnectedSocket() client: Socket,
     @MessageBody('prompt') prompt: string,
   ) {
     try {
-      const resp = await this.movieListService.create(prompt, client.id);
-      client.emit('movieListSocket', resp.message);
+      const resp = await this.jokeService.create(prompt, client.id);
+      client.emit('jokeSocket', resp.message);
     } catch (error) {
-      this.logger.error(`Error creating movie list: ${error}`);
+      this.logger.error(`Error creating joke: ${error}`);
     }
   }
 }

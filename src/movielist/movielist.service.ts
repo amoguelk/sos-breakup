@@ -3,7 +3,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import OpenAI from 'openai';
 import { MovieList } from './movielist.entity';
-import { MovieListDto } from './dto/movielist.dto';
+import { MovieListDto } from './movielist.dto';
 
 @Injectable()
 export class MovieListService {
