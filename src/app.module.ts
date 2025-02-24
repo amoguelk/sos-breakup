@@ -8,6 +8,8 @@ import { DataSource } from 'typeorm';
 import { Advice } from './advice/advice.entity';
 import { PlaylistModule } from './playlist/playlist.module';
 import { Playlist } from './playlist/playlist.entity';
+import { MovieList } from './movielist/movielist.entity';
+import { MovieListModule } from './movielist/movielist.module';
 
 /**
  * The root module of the application
@@ -24,11 +26,12 @@ import { Playlist } from './playlist/playlist.entity';
       database: 'sos_breakup',
       port: 3306,
       synchronize: true, // ! Disable if prod
-      entities: [Advice, Playlist],
+      entities: [Advice, Playlist, MovieList],
     }),
     // Modules
     AdviceModule,
     PlaylistModule,
+    MovieListModule,
   ],
   controllers: [AppController],
   providers: [AppService],
